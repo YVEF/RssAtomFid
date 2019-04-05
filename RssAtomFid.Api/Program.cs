@@ -19,6 +19,10 @@ namespace RssAtomFid.Api
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+            .ConfigureLogging((hostContext, log) =>
+            {
+                log.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
+                log.AddConsole();
+            }).UseStartup<Startup>();
     }
 }
