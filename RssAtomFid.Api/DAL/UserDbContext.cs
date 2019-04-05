@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace RssAtomFid.Api.DAL
 {
-    public class UserDbContext : IdentityDbContext
-    {
-        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
-    }
+    //public class UserDbContext : IdentityDbContext
+    //{
+    //    public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
+    //}
 }
