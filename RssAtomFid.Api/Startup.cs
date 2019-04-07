@@ -35,17 +35,13 @@ namespace RssAtomFid.Api
             services.AddDbContext<ApplicationDbContext>(options => options
             .UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddCors();
-
-            services.AddMvc(options =>
-            {
-                options.MaxModelValidationErrors = 7;
-                options.AllowValidatingTopLevelNodes = true;
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddCors();            
 
             services.AddAutoMapper();
 
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IFeedCollectionRepository, FeedCollectionRepository>();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -57,6 +53,12 @@ namespace RssAtomFid.Api
                     ValidateIssuer = false
                 };
             });
+
+            services.AddMvc(options =>
+            {
+                options.MaxModelValidationErrors = 7;
+                options.AllowValidatingTopLevelNodes = true;                
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         

@@ -14,13 +14,12 @@ namespace RssAtomFid.Api.DAL.Entity
         /// <summary>
         /// Using the tag is selection from the database
         /// </summary>
-        public string TagId { get; set; }
+        public int TagId { get; set; }
 
         /// <summary>
         /// This is a not required id because not all of users want add current item in own collection
         /// </summary>
         public int? FeedsCollectionId { get; set; }
-
     }
 
 

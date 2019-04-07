@@ -10,7 +10,7 @@ using RssAtomFid.Api.DAL;
 namespace RssAtomFid.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190406201333_InitialMigration")]
+    [Migration("20190407130736_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,35 +44,6 @@ namespace RssAtomFid.Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.Feed", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description");
-
-                    b.Property<int>("FeedsCategoryId");
-
-                    b.Property<int?>("FeedsCollectionId");
-
-                    b.Property<string>("Guid");
-
-                    b.Property<string>("Link");
-
-                    b.Property<string>("Media");
-
-                    b.Property<string>("PubDate");
-
-                    b.Property<string>("Title");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FeedsCollectionId");
-
-                    b.ToTable("Feeds");
-                });
-
             modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.FeedsCollection", b =>
                 {
                     b.Property<int>("Id")
@@ -81,9 +52,9 @@ namespace RssAtomFid.Api.Migrations
 
                     b.Property<string>("Comment");
 
-                    b.Property<string>("Title");
+                    b.Property<string>("Name");
 
-                    b.Property<int>("TotalCount");
+                    b.Property<int>("TagId");
 
                     b.Property<int>("UserId");
 
@@ -91,14 +62,41 @@ namespace RssAtomFid.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("FeedsCollection");
+                    b.ToTable("FeedsCollections");
                 });
 
-            modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.Feed", b =>
+            modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.FeedSource", b =>
                 {
-                    b.HasOne("RssAtomFid.Api.DAL.Entity.FeedsCollection")
-                        .WithMany("Feeds")
-                        .HasForeignKey("FeedsCollectionId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("FeedsCollectionId");
+
+                    b.Property<string>("Link");
+
+                    b.Property<int>("TagId");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FeedsCollectionId");
+
+                    b.ToTable("FeedSources");
+                });
+
+            modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.FeedsCollection", b =>
@@ -107,6 +105,13 @@ namespace RssAtomFid.Api.Migrations
                         .WithMany("FeedCollections")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RssAtomFid.Api.DAL.Entity.FeedSource", b =>
+                {
+                    b.HasOne("RssAtomFid.Api.DAL.Entity.FeedsCollection")
+                        .WithMany("FeedsSource")
+                        .HasForeignKey("FeedsCollectionId");
                 });
 #pragma warning restore 612, 618
         }

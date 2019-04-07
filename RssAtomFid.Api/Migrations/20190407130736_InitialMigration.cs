@@ -9,6 +9,19 @@ namespace RssAtomFid.Api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -25,21 +38,21 @@ namespace RssAtomFid.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FeedsCollection",
+                name: "FeedsCollections",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Title = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
                     Comment = table.Column<string>(nullable: true),
-                    TotalCount = table.Column<int>(nullable: false),
+                    TagId = table.Column<int>(nullable: false),
                     UserId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FeedsCollection", x => x.Id);
+                    table.PrimaryKey("PK_FeedsCollections", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FeedsCollection_Users_UserId",
+                        name: "FK_FeedsCollections_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -47,49 +60,48 @@ namespace RssAtomFid.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Feeds",
+                name: "FeedSources",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Title = table.Column<string>(nullable: true),
-                    PubDate = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Guid = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     Link = table.Column<string>(nullable: true),
-                    Media = table.Column<string>(nullable: true),
-                    FeedsCategoryId = table.Column<int>(nullable: false),
+                    TagId = table.Column<int>(nullable: false),
                     FeedsCollectionId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Feeds", x => x.Id);
+                    table.PrimaryKey("PK_FeedSources", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Feeds_FeedsCollection_FeedsCollectionId",
+                        name: "FK_FeedSources_FeedsCollections_FeedsCollectionId",
                         column: x => x.FeedsCollectionId,
-                        principalTable: "FeedsCollection",
+                        principalTable: "FeedsCollections",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Feeds_FeedsCollectionId",
-                table: "Feeds",
-                column: "FeedsCollectionId");
+                name: "IX_FeedsCollections_UserId",
+                table: "FeedsCollections",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FeedsCollection_UserId",
-                table: "FeedsCollection",
-                column: "UserId");
+                name: "IX_FeedSources_FeedsCollectionId",
+                table: "FeedSources",
+                column: "FeedsCollectionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Feeds");
+                name: "FeedSources");
 
             migrationBuilder.DropTable(
-                name: "FeedsCollection");
+                name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "FeedsCollections");
 
             migrationBuilder.DropTable(
                 name: "Users");

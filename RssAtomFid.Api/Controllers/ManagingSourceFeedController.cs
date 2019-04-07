@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RssAtomFid.Api.DAL.Entity;
 using RssAtomFid.Api.DAL.Interfaces;
+using RssAtomFid.Api.ModelsDto;
 
 namespace RssAtomFid.Api.Controllers
 {
@@ -31,32 +33,49 @@ namespace RssAtomFid.Api.Controllers
             this.configuration = configuration;
         }
 
-        [HttpGet]
+        [HttpGet("discovers")]
         public async Task<IActionResult> Get()
         {
             var feedsList = feedsRepository.GetAllDiscoverFeed();
 
-            return Ok(feedsList);
+            return Ok();
         }
 
-        [HttpGet("tagName")]
-        public ActionResult<string> Get([FromQuery] string tagName)
+        [HttpGet("tags")]
+        public IActionResult GetTags()
         {
-            return "value";
+            logger.LogInformation("Start GetTags");
+            var tags = feedsRepository.GetAllTags();
+            logger.LogInformation("GetTags is successful complete");
+            return Ok(tags);
         }
 
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("tags")]
+        public async Task<IActionResult> AddTag([FromBody] string tagName)
         {
+            if (tagName == null) BadRequest();
+            logger.LogInformation("AddTag    |=====>" + tagName);
+            await feedsRepository.AddNewTag(tagName);
+            return StatusCode(201);
         }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        
+        [HttpPost("{tagName}")]
+        public async Task<IActionResult> Post(string tagName, [FromBody] FeedSourceDto feedSourceDto)
         {
+            var tag = feedsRepository.GetAllTags().First(x => x.Name.ToLower() == tagName.ToLower());
+            if (tag == null) BadRequest();
+
+            var feedSource = mapper.Map<FeedSource>(feedSourceDto);
+            logger.LogInformation(" \\\\|||||| =====>>>> " + feedSource.Type.ToString());
+            feedSource.TagId = tag.Id;
+            
+            logger.LogInformation(" \\\\|||||| =====>>>> " + tag.Id);
+
+            await feedsRepository.AddFeedSource(feedSource);
+            return StatusCode(201);
         }
 
-        // DELETE api/values/5
+        
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

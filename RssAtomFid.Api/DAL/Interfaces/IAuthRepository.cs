@@ -28,5 +28,9 @@ namespace RssAtomFid.Api.DAL.Interfaces
         /// <param name="email"></param>
         /// <returns></returns>
         Task<bool> UserExists(string email);
+
+        Task<User> GetUser(string email);
+
+        Task<User> GetUser(int id);
     }
 }

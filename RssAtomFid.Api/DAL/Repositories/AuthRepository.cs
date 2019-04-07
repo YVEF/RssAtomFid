@@ -88,5 +88,15 @@ namespace RssAtomFid.Api.DAL.Repositories
                 return true;
             return false;
         }
+
+        public async Task<User> GetUser(string email)
+        {
+            return await appContext.Users.FirstOrDefaultAsync(x => x.UserName == email);
+        }
+
+        public async Task<User> GetUser(int id)
+        {
+            return await appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        }
     }
 }

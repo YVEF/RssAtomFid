@@ -9,9 +9,39 @@ namespace RssAtomFid.Api.DAL.Interfaces
 {
     public interface IFeedCollectionRepository
     {
-        Task<IEnumerable<DiscoverFeed>> GetAllDiscoverFeed();
-        IEnumerable<DiscoverFeed> GetDiscoverFeedByTag(string tagName);
+        /// <summary>
+        /// Show all feed short description for managing controller
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<FeedSource> GetAllDiscoverFeed();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        Task<IEnumerable<FeedSource>> GetFeedSource(int tagId);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
         IEnumerable<DiscoverFeed> GetDiscoverFeedsByUserCollection(int userId, string collectionName);
-        IEnumerable<string> GetCollectionsByUser();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<FeedsCollection> GetCollectionsByUser(int userId);
+        /// <summary>
+        /// Add new tag (method for admin)
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        Task AddNewTag(string tagName);
+
+        IEnumerable<Tag> GetAllTags();
+
+
+        Task AddFeedSource(FeedSource feed);
     }
 }

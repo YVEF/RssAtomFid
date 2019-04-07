@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RssAtomFid.Api.DAL.Interfaces;
 
 namespace RssAtomFid.Api.Controllers
 {
-    [AllowAnonymous]
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/[controller]/")]
     [ApiController]
     public class DiscoverController : ControllerBase
     {
@@ -20,50 +22,62 @@ namespace RssAtomFid.Api.Controllers
         private readonly IMapper mapper;
         private readonly ILogger logger;
         private readonly IConfiguration configuration;
+        private readonly IAuthRepository authRepository;
 
         public DiscoverController(IFeedCollectionRepository feedsRepository, IMapper mapper, ILogger<DiscoverController> logger,
-            IConfiguration configuration)
+            IAuthRepository authRepository, IConfiguration configuration)
         {
             this.feedsRepository = feedsRepository;
             this.mapper = mapper;
             this.logger = logger;
             this.configuration = configuration;
+            this.authRepository = authRepository;
         }
 
 
-        [HttpGet("tagName")]
-        public ActionResult<string> Get([FromQuery] string tagName)
+        [HttpGet("{tagName}")]
+        public async Task<IActionResult> Get([FromRoute] string tagName)
         {
-            var result = feedsRepository.GetDiscoverFeedByTag(tagName);
-            return Ok();
+            logger.LogInformation(tagName);
+            var tag = feedsRepository.GetAllTags().First(x => x.Name.ToLower() == tagName.ToLower());
+            var feedSources = await feedsRepository.GetFeedSource(tag.Id);
+
+
+            return Ok(feedSources);
         }
 
         [HttpGet("collections")]
-        public ActionResult<string> GetCollections()
+        public async Task<IActionResult> GetCollections()
         {
-            var result = feedsRepository.GetCollectionsByUser();
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var result = feedsRepository.GetCollectionsByUser(currentUserId);
             return Ok();
         }
 
-        [HttpGet("tagName")]
-        public ActionResult<string> Get([FromQuery] string collectionName)
+        [HttpGet("collections/{collectionName}")]
+        public async Task<IActionResult> GetDiscovers([FromQuery] string collectionName)
         {
-            var result = feedsRepository.GetDiscoverFeedByTag(tagName);
+            var parseId = int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier).Value, out int userId);
+            if (parseId == false) return BadRequest();
+            var result = feedsRepository.GetDiscoverFeedsByUserCollection(userId, collectionName);
             return Ok();
         }
 
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPost("{collectionName}")]
+        public async Task<IActionResult> Post([FromBody] string collectionName)
         {
+            return Ok();
         }
 
-        // DELETE api/values/5
+
+        [HttpPut("collections/{collectionName}")]
+        public async Task<IActionResult> Put([FromQuery] string collectionName)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            logger.LogInformation("current user    |==>" + currentUserId);
+            return Ok();
+        }
+
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
