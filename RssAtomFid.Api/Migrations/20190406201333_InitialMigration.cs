@@ -33,7 +33,7 @@ namespace RssAtomFid.Api.Migrations
                     Title = table.Column<string>(nullable: true),
                     Comment = table.Column<string>(nullable: true),
                     TotalCount = table.Column<int>(nullable: false),
-                    UserId = table.Column<int>(nullable: true)
+                    UserId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,7 +43,7 @@ namespace RssAtomFid.Api.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -58,6 +58,7 @@ namespace RssAtomFid.Api.Migrations
                     Guid = table.Column<string>(nullable: true),
                     Link = table.Column<string>(nullable: true),
                     Media = table.Column<string>(nullable: true),
+                    FeedsCategoryId = table.Column<int>(nullable: false),
                     FeedsCollectionId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>

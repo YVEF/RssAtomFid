@@ -10,7 +10,7 @@ using RssAtomFid.Api.DAL;
 namespace RssAtomFid.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20190405232654_InitialMigration")]
+    [Migration("20190406201333_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,8 @@ namespace RssAtomFid.Api.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<int>("FeedsCategoryId");
+
                     b.Property<int?>("FeedsCollectionId");
 
                     b.Property<string>("Guid");
@@ -83,7 +85,7 @@ namespace RssAtomFid.Api.Migrations
 
                     b.Property<int>("TotalCount");
 
-                    b.Property<int?>("UserId");
+                    b.Property<int>("UserId");
 
                     b.HasKey("Id");
 
@@ -103,7 +105,8 @@ namespace RssAtomFid.Api.Migrations
                 {
                     b.HasOne("RssAtomFid.Api.DAL.Entity.Account.User")
                         .WithMany("FeedCollections")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

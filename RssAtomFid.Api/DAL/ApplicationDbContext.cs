@@ -13,9 +13,8 @@ namespace RssAtomFid.Api.DAL
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Feed> Feeds { get; set; }
-
-
-        
+        public DbSet<FeedsCollection> FeedsCollections { get; set; }
+        public DbSet<FeedSource> FeedSources { get; set; }
+        public DbSet<Tag> Tags { get; set; }
     }
 }
