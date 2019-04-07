@@ -55,7 +55,7 @@ namespace RssAtomFid.Api.Controllers
         {
             if (tagName == null) BadRequest();
             logger.LogInformation("AddTag    |=====>" + tagName);
-            await feedsRepository.AddNewTag(tagName);
+            await feedsRepository.AddTag(tagName);
             return StatusCode(201);
         }
         

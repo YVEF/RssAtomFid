@@ -18,8 +18,7 @@ namespace RssAtomFid.Api.Helpers
             CreateMap<UserLoginDto, User>();
             CreateMap<User, UserViewDto>();
             CreateMap<DiscoverFeed, DiscoverFeedViewDto>();
-            CreateMap<FeedsCollection, FeedsCollectionDto>();
-            // CreateMap<FeedSourceDto, FeedSource>().ForMember(dest => dest.Type, option => option.MapFrom(src => src.Type));
+            CreateMap<CollectionCreate, FeedsCollection>();
 
             CreateMap<FeedSourceDto, FeedSource>();
         }

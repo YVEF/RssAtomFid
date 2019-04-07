@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RssAtomFid.Api.DAL.Entity;
 using RssAtomFid.Api.DAL.Interfaces;
+using RssAtomFid.Api.ModelsDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace RssAtomFid.Api.DAL.Repositories
             this.logger = logger;
         }
 
-        public async Task AddNewTag(string tagName)
+        public async Task AddTag(string tagName)
         {
             await appContext.Tags.AddAsync(new Tag() { Name = tagName });
             await appContext.SaveChangesAsync();
@@ -32,12 +33,12 @@ namespace RssAtomFid.Api.DAL.Repositories
             return appContext.FeedSources.AsNoTracking();
         }
 
-        public IEnumerable<FeedsCollection> GetCollectionsByUser(int userId)
+        public async Task<IEnumerable<FeedsCollection>> GetCollectionsByUser(int userId)
         {
-            throw new NotImplementedException();
+            return await appContext.FeedsCollections.Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<IEnumerable<FeedSource>> GetFeedSource(int tagId)
+        public async Task<IEnumerable<FeedSource>> GetFeedSources(int tagId)
         {
             return await appContext.FeedSources.Where(x => x.TagId == tagId).ToListAsync();
         }
@@ -56,6 +57,17 @@ namespace RssAtomFid.Api.DAL.Repositories
         public async Task AddFeedSource(FeedSource feed)
         {
             await appContext.FeedSources.AddAsync(feed);
+            await appContext.SaveChangesAsync();
+        }
+
+        public async Task<FeedSource> GetFeedSource(int sourceId)
+        {
+            return await appContext.FeedSources.FirstOrDefaultAsync(x => x.Id == sourceId);
+        }
+
+        public async Task CreateCollection(FeedsCollection collection)
+        {
+            await appContext.FeedsCollections.AddAsync(collection);
             await appContext.SaveChangesAsync();
         }
     }

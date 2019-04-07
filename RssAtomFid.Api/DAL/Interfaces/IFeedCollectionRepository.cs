@@ -1,5 +1,6 @@
 ﻿
 using RssAtomFid.Api.DAL.Entity;
+using RssAtomFid.Api.ModelsDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace RssAtomFid.Api.DAL.Interfaces
         /// </summary>
         /// <param name="tagName"></param>
         /// <returns></returns>
-        Task<IEnumerable<FeedSource>> GetFeedSource(int tagId);
+        Task<IEnumerable<FeedSource>> GetFeedSources(int tagId);
         /// <summary>
         /// 
         /// </summary>
@@ -31,17 +32,21 @@ namespace RssAtomFid.Api.DAL.Interfaces
         /// 
         /// </summary>
         /// <returns></returns>
-        IEnumerable<FeedsCollection> GetCollectionsByUser(int userId);
+        Task<IEnumerable<FeedsCollection>> GetCollectionsByUser(int userId);
         /// <summary>
         /// Add new tag (method for admin)
         /// </summary>
         /// <param name="tagName"></param>
         /// <returns></returns>
-        Task AddNewTag(string tagName);
+        Task AddTag(string tagName);
 
         IEnumerable<Tag> GetAllTags();
 
 
         Task AddFeedSource(FeedSource feed);
+
+        Task<FeedSource> GetFeedSource(int sourceId);
+
+        Task CreateCollection(FeedsCollection collection);
     }
 }

@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RssAtomFid.Api.DAL.Entity;
 using RssAtomFid.Api.DAL.Interfaces;
+using RssAtomFid.Api.Helpers;
+using RssAtomFid.Api.ModelsDto;
 
 namespace RssAtomFid.Api.Controllers
 {
@@ -40,36 +43,55 @@ namespace RssAtomFid.Api.Controllers
         {
             logger.LogInformation(tagName);
             var tag = feedsRepository.GetAllTags().First(x => x.Name.ToLower() == tagName.ToLower());
-            var feedSources = await feedsRepository.GetFeedSource(tag.Id);
+            var feedSources = await feedsRepository.GetFeedSources(tag.Id);
 
-
-            return Ok(feedSources);
+            var discovers = new List<DiscoverFeed>(feedSources.Count());
+            foreach(var item in feedSources)
+            {
+                var result = await DiscoverParser.Parse(item.Link, (Helpers.FeedType)item.Type);
+                result.SourceId = feedSources.First().Id;
+                discovers.Add(result);
+            }
+            return Ok(discovers);
         }
+
+        [HttpGet("{tagName}/{sourceId:int}")]
+        public async Task<IActionResult> GetFeedItems([FromRoute] int sourceId)
+        {
+            var feedSource = await feedsRepository.GetFeedSource(sourceId);
+            var result = await ItemParser.Parse(feedSource.Link, (Helpers.FeedType)feedSource.Type);
+            return Ok(result);
+        }
+
 
         [HttpGet("collections")]
         public async Task<IActionResult> GetCollections()
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var result = feedsRepository.GetCollectionsByUser(currentUserId);
-            return Ok();
+            var result = await feedsRepository.GetCollectionsByUser(currentUserId);
+            return Ok(result);
         }
 
         [HttpGet("collections/{collectionName}")]
-        public async Task<IActionResult> GetDiscovers([FromQuery] string collectionName)
+        public async Task<IActionResult> GetDiscovers([FromRoute] string collectionName)
         {
-            var parseId = int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier).Value, out int userId);
-            if (parseId == false) return BadRequest();
-            var result = feedsRepository.GetDiscoverFeedsByUserCollection(userId, collectionName);
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var result = feedsRepository.GetDiscoverFeedsByUserCollection(currentUserId, collectionName);
             return Ok();
         }
 
-        [HttpPost("{collectionName}")]
-        public async Task<IActionResult> Post([FromBody] string collectionName)
+        [HttpPost("collections")]
+        public async Task<IActionResult> Post([FromBody] CollectionCreate newCollection)
         {
-            return Ok();
+            var feedsCollection = mapper.Map<FeedsCollection>(newCollection);
+            feedsCollection.UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            feedsCollection.TagId = feedsRepository.GetAllTags().First(x => x.Name == newCollection.TagName).Id;
+
+            await feedsRepository.CreateCollection(feedsCollection);
+            return StatusCode(201);
         }
 
-
+        // Add feed source to collection
         [HttpPut("collections/{collectionName}")]
         public async Task<IActionResult> Put([FromQuery] string collectionName)
         {
