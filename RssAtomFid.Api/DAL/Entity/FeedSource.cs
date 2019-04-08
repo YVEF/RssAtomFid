@@ -23,9 +23,5 @@ namespace RssAtomFid.Api.DAL.Entity
     }
 
 
-    public enum FeedType
-    {
-        RSS,
-        Atom
-    }
+    
 }

@@ -43,9 +43,10 @@ namespace RssAtomFid.Api.DAL.Repositories
             return await appContext.FeedSources.Where(x => x.TagId == tagId).ToListAsync();
         }
 
-        public IEnumerable<DiscoverFeed> GetDiscoverFeedsByUserCollection(int userId, string collectionName)
+        public async Task<IEnumerable<FeedSource>> GetDiscoverFeedsByUserCollection(int userId, string collectionName)
         {
-            throw new NotImplementedException();
+            var collection = await appContext.FeedsCollections.FirstOrDefaultAsync(x => x.Name == collectionName);
+            return appContext.FeedSources.Where(x => x.FeedsCollectionId == collection.Id).AsNoTracking();
         }
 
         public IEnumerable<Tag> GetAllTags()

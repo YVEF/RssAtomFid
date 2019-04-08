@@ -19,7 +19,7 @@ namespace RssAtomFid.Api.Controllers
     [Authorize]
     [Route("api/[controller]/")]
     [ApiController]
-    public class DiscoverController : ControllerBase
+    public class DiscoversController : ControllerBase
     {
         private readonly IFeedCollectionRepository feedsRepository;
         private readonly IMapper mapper;
@@ -27,7 +27,7 @@ namespace RssAtomFid.Api.Controllers
         private readonly IConfiguration configuration;
         private readonly IAuthRepository authRepository;
 
-        public DiscoverController(IFeedCollectionRepository feedsRepository, IMapper mapper, ILogger<DiscoverController> logger,
+        public DiscoversController(IFeedCollectionRepository feedsRepository, IMapper mapper, ILogger<DiscoversController> logger,
             IAuthRepository authRepository, IConfiguration configuration)
         {
             this.feedsRepository = feedsRepository;
@@ -48,18 +48,21 @@ namespace RssAtomFid.Api.Controllers
             var discovers = new List<DiscoverFeed>(feedSources.Count());
             foreach(var item in feedSources)
             {
-                var result = await DiscoverParser.Parse(item.Link, (Helpers.FeedType)item.Type);
-                result.SourceId = feedSources.First().Id;
+                var result = await DiscoverParser.Parse(item.Link, item.Type);
+                if (result == null) continue;
+                result.sourceId = item.Id;
                 discovers.Add(result);
             }
             return Ok(discovers);
         }
 
+
         [HttpGet("{tagName}/{sourceId:int}")]
         public async Task<IActionResult> GetFeedItems([FromRoute] int sourceId)
         {
             var feedSource = await feedsRepository.GetFeedSource(sourceId);
-            var result = await ItemParser.Parse(feedSource.Link, (Helpers.FeedType)feedSource.Type);
+            var result = await ItemFeedParser.Parse(feedSource.Link, feedSource.Type);
+            
             return Ok(result);
         }
 
@@ -76,7 +79,16 @@ namespace RssAtomFid.Api.Controllers
         public async Task<IActionResult> GetDiscovers([FromRoute] string collectionName)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var result = feedsRepository.GetDiscoverFeedsByUserCollection(currentUserId, collectionName);
+            var feedSources = await feedsRepository.GetDiscoverFeedsByUserCollection(currentUserId, collectionName);
+
+            var discovers = new List<DiscoverFeed>(feedSources.Count());
+            foreach (var item in feedSources)
+            {
+                var result = await DiscoverParser.Parse(item.Link, item.Type);
+                if (result == null) continue;
+                result.sourceId = item.Id;
+                discovers.Add(result);
+            }
             return Ok();
         }
 

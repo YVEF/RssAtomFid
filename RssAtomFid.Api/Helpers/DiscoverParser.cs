@@ -1,4 +1,5 @@
-﻿using RssAtomFid.Api.ModelsDto;
+﻿using RssAtomFid.Api.DAL.Entity;
+using RssAtomFid.Api.ModelsDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,18 +31,18 @@ namespace RssAtomFid.Api.Helpers
             {
                 XDocument document = XDocument.Load(url);
                 if (document == null) throw new ArgumentNullException();
-                var dics = document.Root.Elements().FirstOrDefault(i => i.Name.LocalName == "feed");                
+                var dics = document.Root.Elements().FirstOrDefault(i => i.Name.LocalName == "feed");
 
-                return new DiscoverFeed {
+                return new DiscoverFeed
+                {
                     Description = dics.Element("title").Value,
-                    Link = dics.Element("link").Attribute("href").Value,
-                    UpdateTime = SafeDateParse(dics.Element("updated").Value),
+                    Link = dics.Element("link").Attribute("href").Value,                    
                     Icon = dics.Element("icon").Value
                 };
             }
             catch (ArgumentNullException)
             {
-                return null; ;
+                return null;
             }
         }
 
@@ -49,7 +50,7 @@ namespace RssAtomFid.Api.Helpers
         {
             try
             {
-                
+
                 XDocument document = XDocument.Load(url);
                 if (document == null) throw new ArgumentNullException();
 
@@ -63,7 +64,7 @@ namespace RssAtomFid.Api.Helpers
 
                 return result;
             }
-            catch(ArgumentNullException)
+            catch (ArgumentNullException)
             {
                 return null;
             }

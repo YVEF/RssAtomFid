@@ -14,7 +14,12 @@ using RssAtomFid.Api.ModelsDto;
 
 namespace RssAtomFid.Api.Controllers
 {
-    [AllowAnonymous]
+    // Add admin role in the future
+
+    /// <summary>
+    /// Admins only
+    /// </summary>
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ManagingSourceFeedController : ControllerBase
@@ -33,14 +38,6 @@ namespace RssAtomFid.Api.Controllers
             this.configuration = configuration;
         }
 
-        [HttpGet("discovers")]
-        public async Task<IActionResult> Get()
-        {
-            var feedsList = feedsRepository.GetAllDiscoverFeed();
-
-            return Ok();
-        }
-
         [HttpGet("tags")]
         public IActionResult GetTags()
         {
@@ -50,26 +47,28 @@ namespace RssAtomFid.Api.Controllers
             return Ok(tags);
         }
 
+        // Add new Tag
         [HttpPost("tags")]
         public async Task<IActionResult> AddTag([FromBody] string tagName)
         {
             if (tagName == null) BadRequest();
-            logger.LogInformation("AddTag    |=====>" + tagName);
+            logger.LogInformation("AddTag  ==>" + tagName);
             await feedsRepository.AddTag(tagName);
             return StatusCode(201);
         }
         
+        // Add new feed source by tag
         [HttpPost("{tagName}")]
-        public async Task<IActionResult> Post(string tagName, [FromBody] FeedSourceDto feedSourceDto)
+        public async Task<IActionResult> AddFeedSource(string tagName, [FromBody] FeedSourceDto feedSourceDto)
         {
-            var tag = feedsRepository.GetAllTags().First(x => x.Name.ToLower() == tagName.ToLower());
+            var tag = feedsRepository.GetAllTags().FirstOrDefault(x => x.Name.ToLower() == tagName.ToLower());
             if (tag == null) BadRequest();
 
             var feedSource = mapper.Map<FeedSource>(feedSourceDto);
-            logger.LogInformation(" \\\\|||||| =====>>>> " + feedSource.Type.ToString());
+            logger.LogInformation(" feedSource.Type ==> " + feedSource.Type.ToString());
             feedSource.TagId = tag.Id;
             
-            logger.LogInformation(" \\\\|||||| =====>>>> " + tag.Id);
+            logger.LogInformation(" tag.Id ==> " + tag.Id);
 
             await feedsRepository.AddFeedSource(feedSource);
             return StatusCode(201);

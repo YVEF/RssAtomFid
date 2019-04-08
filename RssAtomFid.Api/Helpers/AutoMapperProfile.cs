@@ -17,7 +17,7 @@ namespace RssAtomFid.Api.Helpers
             CreateMap<UserRegisterDto, User>();
             CreateMap<UserLoginDto, User>();
             CreateMap<User, UserViewDto>();
-            CreateMap<DiscoverFeed, DiscoverFeedViewDto>();
+            //CreateMap<DiscoverFeed, DiscoverFeedViewDto>();
             CreateMap<CollectionCreate, FeedsCollection>();
 
             CreateMap<FeedSourceDto, FeedSource>();

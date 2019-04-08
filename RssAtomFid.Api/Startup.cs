@@ -17,6 +17,10 @@ using RssAtomFid.Api.DAL.Interfaces;
 using RssAtomFid.Api.DAL.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using RssAtomFid.Api.Helpers;
 
 namespace RssAtomFid.Api
 {
@@ -67,6 +71,18 @@ namespace RssAtomFid.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler(build =>
+                {
+                    build.Run(async context =>
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        IExceptionHandlerFeature error = context.Features.Get<IExceptionHandlerFeature>();
+                        if (error != null) await context.Response.WriteAsync(error.Error.Message);
+                    });
+                });
             }
 
             loggerFactory.AddConsole();

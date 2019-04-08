@@ -38,7 +38,7 @@ namespace RssAtomFid.Api.Controllers
             this.configuration = configuration;
         }
 
-        [HttpPost("Register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto userRegDto)
         {
             logger.LogInformation(nameof(userRegDto), "start Register");
@@ -57,7 +57,7 @@ namespace RssAtomFid.Api.Controllers
             return Ok(userResult);
         }
 
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);

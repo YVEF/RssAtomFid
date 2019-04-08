@@ -27,7 +27,7 @@ namespace RssAtomFid.Api.DAL.Interfaces
         /// <param name="userId"></param>
         /// <param name="collectionName"></param>
         /// <returns></returns>
-        IEnumerable<DiscoverFeed> GetDiscoverFeedsByUserCollection(int userId, string collectionName);
+        Task<IEnumerable<FeedSource>> GetDiscoverFeedsByUserCollection(int userId, string collectionName);
         /// <summary>
         /// 
         /// </summary>

@@ -1,4 +1,5 @@
-﻿using RssAtomFid.Api.ModelsDto;
+﻿using RssAtomFid.Api.DAL.Entity;
+using RssAtomFid.Api.ModelsDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,7 @@ using System.Xml.Linq;
 
 namespace RssAtomFid.Api.Helpers
 {
-    public enum FeedType { RSS, Atom }
-
-    public class ItemParser
+    public class ItemFeedParser
     {
         public static Task<IEnumerable<FeedItem>> Parse(string url, FeedType feedType)
         {
@@ -26,7 +25,7 @@ namespace RssAtomFid.Api.Helpers
 
                     default: throw new NotSupportedException();
                 }
-            });            
+            });
         }
 
         private static IEnumerable<FeedItem> ParseAtom(string url)
@@ -36,12 +35,12 @@ namespace RssAtomFid.Api.Helpers
                 XDocument document = XDocument.Load(url);
                 if (document == null) throw new ArgumentNullException();
                 return document.Root.Elements().Where(i => i.Name.LocalName == "entry").Select(item => new FeedItem
-                              {
-                                  Description = item.Elements().First(i => i.Name.LocalName == "content").Value,
-                                  Link = item.Elements().First(i => i.Name.LocalName == "link").Attribute("href").Value,
-                                  PubDate = SafeDateParse(item.Elements().First(i => i.Name.LocalName == "published").Value),
-                                  Title = item.Elements().First(i => i.Name.LocalName == "title").Value
-                              });
+                {
+                    Description = item.Elements().First(i => i.Name.LocalName == "content").Value,
+                    Link = item.Elements().First(i => i.Name.LocalName == "link").Attribute("href").Value,
+                    PubDate = SafeDateParse(item.Elements().First(i => i.Name.LocalName == "published").Value),
+                    Title = item.Elements().First(i => i.Name.LocalName == "title").Value
+                });
             }
             catch
             {
@@ -80,7 +79,7 @@ namespace RssAtomFid.Api.Helpers
         }
     }
 
-    
+
 
 
 }
