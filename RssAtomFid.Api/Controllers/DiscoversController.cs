@@ -37,6 +37,16 @@ namespace RssAtomFid.Api.Controllers
             this.authRepository = authRepository;
         }
 
+        // return tags list
+        [HttpGet()]
+        public IActionResult GetTags()
+        {
+            logger.LogInformation("Start GetTags");
+            var tags = feedsRepository.GetAllTags();
+            logger.LogInformation("GetTags is successful complete");
+            return Ok(tags);
+        }
+
 
         [HttpGet("{tagName}")]
         public async Task<IActionResult> Get([FromRoute] string tagName)
@@ -67,7 +77,7 @@ namespace RssAtomFid.Api.Controllers
         }
 
 
-        [HttpGet("collections")]
+        [HttpGet("collections", Name = "GetCollections")]
         public async Task<IActionResult> GetCollections()
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -76,7 +86,7 @@ namespace RssAtomFid.Api.Controllers
         }
 
         [HttpGet("collections/{collectionName}")]
-        public async Task<IActionResult> GetDiscovers([FromRoute] string collectionName)
+        public async Task<IActionResult> GetSources([FromRoute] string collectionName)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var feedSources = await feedsRepository.GetDiscoverFeedsByUserCollection(currentUserId, collectionName);
@@ -89,32 +99,52 @@ namespace RssAtomFid.Api.Controllers
                 result.sourceId = item.Id;
                 discovers.Add(result);
             }
-            return Ok();
+            return Ok(discovers);
         }
 
         [HttpPost("collections")]
         public async Task<IActionResult> Post([FromBody] CollectionCreate newCollection)
         {
-            var feedsCollection = mapper.Map<FeedsCollection>(newCollection);
-            feedsCollection.UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            feedsCollection.TagId = feedsRepository.GetAllTags().First(x => x.Name == newCollection.TagName).Id;
+            try
+            {
+                if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+                var feedsCollection = mapper.Map<FeedsCollection>(newCollection);
+                feedsCollection.UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            await feedsRepository.CreateCollection(feedsCollection);
-            return StatusCode(201);
+                await feedsRepository.CreateCollection(feedsCollection);
+                return StatusCode(201);
+            }
+            catch
+            {
+                return StatusCode(400, "Incorrect request");
+            }
+            
         }
 
         // Add feed source to collection
         [HttpPut("collections/{collectionName}")]
-        public async Task<IActionResult> Put([FromQuery] string collectionName)
+        public async Task<IActionResult> Put([FromRoute] string collectionName, [FromBody] int sourceId)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            logger.LogInformation("current user    |==>" + currentUserId);
-            return Ok();
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                logger.LogInformation("current user    |==>" + currentUserId);
+                await feedsRepository.AddFeedSourceToCollection(currentUserId, collectionName, sourceId);
+                return StatusCode(201);
+            }
+            catch
+            {
+                return StatusCode(400, "Incorrect request");
+            }
+
         }
 
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("collections")]
+        public IActionResult Delete([FromBody] string collectionName)
         {
+            var result = feedsRepository.DeleteCollection(collectionName);
+            if (result == false) return BadRequest("nonexistent collection");
+            return CreatedAtAction("GetCollections", StatusCode(200));
         }
     }
 }

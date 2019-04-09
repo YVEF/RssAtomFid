@@ -45,7 +45,8 @@ namespace RssAtomFid.Api.DAL.Repositories
 
         public async Task<IEnumerable<FeedSource>> GetDiscoverFeedsByUserCollection(int userId, string collectionName)
         {
-            var collection = await appContext.FeedsCollections.FirstOrDefaultAsync(x => x.Name == collectionName);
+            var collection = await appContext.FeedsCollections
+                .FirstOrDefaultAsync(x => x.Name.ToLower() == collectionName.ToLower());
             return appContext.FeedSources.Where(x => x.FeedsCollectionId == collection.Id).AsNoTracking();
         }
 
@@ -70,6 +71,27 @@ namespace RssAtomFid.Api.DAL.Repositories
         {
             await appContext.FeedsCollections.AddAsync(collection);
             await appContext.SaveChangesAsync();
+        }
+
+        public async Task AddFeedSourceToCollection(int userId, string collectionName, int sourceId)
+        {
+            var collection = await appContext.FeedsCollections
+                .FirstOrDefaultAsync(x => x.Name.ToLower() == collectionName.ToLower() && x.UserId == userId);
+
+            var feed = await appContext.FeedSources.FirstOrDefaultAsync(x => x.Id == sourceId);
+            feed.FeedsCollectionId = collection.Id;
+
+            appContext.FeedSources.Update(feed);
+            await appContext.SaveChangesAsync();
+        }
+
+        public bool DeleteCollection(string collectionName)
+        {
+            var entity = appContext.FeedsCollections.FirstOrDefault(x => x.Name.ToLower() == collectionName.ToLower());
+            if (entity == null) return false;
+            appContext.FeedsCollections.Remove(entity);
+            appContext.SaveChanges();
+            return true;
         }
     }
 }

@@ -38,14 +38,7 @@ namespace RssAtomFid.Api.Controllers
             this.configuration = configuration;
         }
 
-        [HttpGet("tags")]
-        public IActionResult GetTags()
-        {
-            logger.LogInformation("Start GetTags");
-            var tags = feedsRepository.GetAllTags();
-            logger.LogInformation("GetTags is successful complete");
-            return Ok(tags);
-        }
+        
 
         // Add new Tag
         [HttpPost("tags")]

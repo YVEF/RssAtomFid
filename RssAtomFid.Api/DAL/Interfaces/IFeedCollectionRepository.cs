@@ -48,5 +48,9 @@ namespace RssAtomFid.Api.DAL.Interfaces
         Task<FeedSource> GetFeedSource(int sourceId);
 
         Task CreateCollection(FeedsCollection collection);
+
+        Task AddFeedSourceToCollection(int userId, string collectionName, int sourceId);
+
+        bool DeleteCollection(string collectionName);
     }
 }
