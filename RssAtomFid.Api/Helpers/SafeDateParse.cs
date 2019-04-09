@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace RssAtomFid.Api.Helpers
 {
-    public static class DateTimeExtension
+    public static class SafeDateParse
     {
-        private static DateTime SafeDateParse(this DateTime time, string date)
+        public static DateTime Parse(string date)
         {
             var success = DateTime.TryParse(date, out DateTime pubDate);
             if (success) return pubDate;

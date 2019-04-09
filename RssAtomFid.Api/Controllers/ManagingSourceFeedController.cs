@@ -14,13 +14,13 @@ using RssAtomFid.Api.ModelsDto;
 
 namespace RssAtomFid.Api.Controllers
 {
-    // Add admin role in the future
-
     /// <summary>
     /// Admins only
+    /// Add admin role in the future
     /// </summary>
     [Authorize]
     [Route("api/[controller]")]
+    [ResponseCache(CacheProfileName = "EnableCaching")]
     [ApiController]
     public class ManagingSourceFeedController : ControllerBase
     {
@@ -54,6 +54,7 @@ namespace RssAtomFid.Api.Controllers
         [HttpPost("{tagName}")]
         public async Task<IActionResult> AddFeedSource(string tagName, [FromBody] FeedSourceDto feedSourceDto)
         {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var tag = feedsRepository.GetAllTags().FirstOrDefault(x => x.Name.ToLower() == tagName.ToLower());
             if (tag == null) BadRequest();
 
@@ -67,10 +68,5 @@ namespace RssAtomFid.Api.Controllers
             return StatusCode(201);
         }
 
-        
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

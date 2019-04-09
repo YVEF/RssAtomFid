@@ -11,9 +11,9 @@ using System.Xml.Linq;
 
 namespace RssAtomFid.Api.Helpers
 {
-    public class ItemFeedParser
+    public class ItemFeedParser : ITypeParse<IEnumerable<FeedItem>>
     {
-        public static Task<IEnumerable<FeedItem>> Parse(string url, FeedType feedType)
+        public Task<IEnumerable<FeedItem>> Parse(string url, FeedType feedType)
         {
             return Task.Run(() =>
             {
@@ -28,7 +28,7 @@ namespace RssAtomFid.Api.Helpers
             });
         }
 
-        private static IEnumerable<FeedItem> ParseAtom(string url)
+        private IEnumerable<FeedItem> ParseAtom(string url)
         {
             try
             {
@@ -38,17 +38,17 @@ namespace RssAtomFid.Api.Helpers
                 {
                     Description = item.Elements().First(i => i.Name.LocalName == "content").Value,
                     Link = item.Elements().First(i => i.Name.LocalName == "link").Attribute("href").Value,
-                    PubDate = SafeDateParse(item.Elements().First(i => i.Name.LocalName == "published").Value),
+                    PubDate = SafeDateParse.Parse(item.Elements().First(i => i.Name.LocalName == "published").Value),
                     Title = item.Elements().First(i => i.Name.LocalName == "title").Value
                 });
             }
-            catch
+            catch(ArgumentNullException)
             {
                 return null; ;
             }
         }
 
-        private static IEnumerable<FeedItem> ParseRss(string url)
+        private IEnumerable<FeedItem> ParseRss(string url)
         {
             try
             {
@@ -59,24 +59,24 @@ namespace RssAtomFid.Api.Helpers
                        {
                            Description = item.Elements().First(i => i.Name.LocalName == "description").Value,
                            Link = item.Elements().First(i => i.Name.LocalName == "link").Value,
-                           PubDate = SafeDateParse(item.Elements().First(i => i.Name.LocalName == "pubDate").Value),
+                           PubDate = SafeDateParse.Parse(item.Elements().First(i => i.Name.LocalName == "pubDate").Value),
                            Title = item.Elements().First(i => i.Name.LocalName == "title").Value
                        });
             }
-            catch
+            catch(ArgumentNullException)
             {
                 return null;
             }
         }
 
 
-        private static DateTime SafeDateParse(string date)
-        {
-            var success = DateTime.TryParse(date, out DateTime pubDate);
-            if (success) return pubDate;
+        //private static DateTime SafeDateParse(string date)
+        //{
+        //    var success = DateTime.TryParse(date, out DateTime pubDate);
+        //    if (success) return pubDate;
 
-            return DateTime.Now;
-        }
+        //    return DateTime.Now;
+        //}
     }
 
 

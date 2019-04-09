@@ -21,6 +21,8 @@ using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using RssAtomFid.Api.Helpers;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 namespace RssAtomFid.Api
 {
@@ -42,6 +44,11 @@ namespace RssAtomFid.Api
             services.AddCors();            
 
             services.AddAutoMapper();
+            services.AddResponseCompression();
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
 
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IFeedCollectionRepository, FeedCollectionRepository>();
@@ -61,8 +68,17 @@ namespace RssAtomFid.Api
             services.AddMvc(options =>
             {
                 options.MaxModelValidationErrors = 7;
-                options.AllowValidatingTopLevelNodes = true;                
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                options.AllowValidatingTopLevelNodes = true;
+                options.CacheProfiles.Add("EnableCaching", new CacheProfile
+                {
+                    Duration = (int)TimeSpan.FromMinutes(20).TotalSeconds
+                });
+                options.CacheProfiles.Add("DisableCaching", new CacheProfile
+                {
+                    Location = ResponseCacheLocation.None,
+                    NoStore = true
+                });
+                }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         
@@ -83,6 +99,8 @@ namespace RssAtomFid.Api
                         if (error != null) await context.Response.WriteAsync(error.Error.Message);
                     });
                 });
+
+                app.UseResponseCompression();
             }
 
             loggerFactory.AddConsole();

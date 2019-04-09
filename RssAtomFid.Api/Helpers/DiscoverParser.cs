@@ -8,9 +8,9 @@ using System.Xml.Linq;
 
 namespace RssAtomFid.Api.Helpers
 {
-    public class DiscoverParser
+    public class DiscoverParser : ITypeParse<DiscoverFeed>
     {
-        public static Task<DiscoverFeed> Parse(string url, FeedType feedType)
+        public Task<DiscoverFeed> Parse(string url, FeedType feedType)
         {
             return Task.Run(() =>
             {
@@ -25,7 +25,7 @@ namespace RssAtomFid.Api.Helpers
             });
         }
 
-        private static DiscoverFeed ParseAtom(string url)
+        private DiscoverFeed ParseAtom(string url)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace RssAtomFid.Api.Helpers
             }
         }
 
-        private static DiscoverFeed ParseRss(string url)
+        private DiscoverFeed ParseRss(string url)
         {
             try
             {
@@ -68,14 +68,6 @@ namespace RssAtomFid.Api.Helpers
             {
                 return null;
             }
-        }
-
-        private static DateTime SafeDateParse(string date)
-        {
-            var success = DateTime.TryParse(date, out DateTime pubDate);
-            if (success) return pubDate;
-
-            return DateTime.Now;
         }
     }
 }

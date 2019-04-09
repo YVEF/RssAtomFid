@@ -18,6 +18,7 @@ namespace RssAtomFid.Api.Controllers
 {
     [Authorize]
     [Route("api/[controller]/")]
+    [ResponseCache(CacheProfileName = "EnableCaching")]
     [ApiController]
     public class DiscoversController : ControllerBase
     {
@@ -47,18 +48,19 @@ namespace RssAtomFid.Api.Controllers
             return Ok(tags);
         }
 
-
+        
         [HttpGet("{tagName}")]
-        public async Task<IActionResult> Get([FromRoute] string tagName)
+        public async Task<IActionResult> GetDiscoversFeeds([FromRoute] string tagName)
         {
             logger.LogInformation(tagName);
             var tag = feedsRepository.GetAllTags().First(x => x.Name.ToLower() == tagName.ToLower());
             var feedSources = await feedsRepository.GetFeedSources(tag.Id);
 
             var discovers = new List<DiscoverFeed>(feedSources.Count());
-            foreach(var item in feedSources)
+            var parser = new XmlParser<DiscoverFeed>(new DiscoverParser());
+            foreach (var item in feedSources)
             {
-                var result = await DiscoverParser.Parse(item.Link, item.Type);
+                var result = await parser.Parse(item.Link, item.Type);
                 if (result == null) continue;
                 result.sourceId = item.Id;
                 discovers.Add(result);
@@ -71,7 +73,8 @@ namespace RssAtomFid.Api.Controllers
         public async Task<IActionResult> GetFeedItems([FromRoute] int sourceId)
         {
             var feedSource = await feedsRepository.GetFeedSource(sourceId);
-            var result = await ItemFeedParser.Parse(feedSource.Link, feedSource.Type);
+            var parser = new XmlParser<IEnumerable<FeedItem>>(new ItemFeedParser());
+            var result = await parser.Parse(feedSource.Link, feedSource.Type);
             
             return Ok(result);
         }
@@ -92,9 +95,10 @@ namespace RssAtomFid.Api.Controllers
             var feedSources = await feedsRepository.GetDiscoverFeedsByUserCollection(currentUserId, collectionName);
 
             var discovers = new List<DiscoverFeed>(feedSources.Count());
+            var discover = new DiscoverParser();
             foreach (var item in feedSources)
             {
-                var result = await DiscoverParser.Parse(item.Link, item.Type);
+                var result = await discover.Parse(item.Link, item.Type);
                 if (result == null) continue;
                 result.sourceId = item.Id;
                 discovers.Add(result);
